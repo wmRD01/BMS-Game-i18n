@@ -2,20 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const path_1 = require("path");
+const languageTemplate_1 = require("../languageTemplate");
 const Vue = require('vue/dist/vue.common.prod');
-const languageContentTemplate = `
-const win = window as any;
-
-export const languages = {
-    // Data
-};
-
-if (!win.languages) {
-    win.languages = {};
-}
-
-win.languages.{{name}} = languages;
-`;
 // 兼容 3.3.0 之前的版本
 Editor.Panel.define = Editor.Panel.define || function (options) {
     return options;
@@ -106,9 +94,6 @@ module.exports = Editor.Panel.define({
                     });
                 },
                 async select(language) {
-                    const lang = await Editor.Profile.getProject('i18n', 'lang');
-                    console.log("上一個", lang);
-                    // Editor.Dialog.warn(lang);
                     await Editor.Profile.setProject('i18n', 'lang', language);
                     vm.current = language;
                 },
@@ -119,20 +104,17 @@ module.exports = Editor.Panel.define({
                         cancel: 1,
                     });
                     if (result.response === 0) {
-                        await Editor.Message.request('asset-db', 'delete-asset', `db://assets/resources/i18n/${name}.ts`);
+                        await Editor.Message.request('asset-db', 'delete-asset', `db://i18n/i18n/${name}.ts`);
                         vm.refresh();
                     }
                 },
                 async refresh() {
-                    const dir = (0, path_1.join)(Editor.Project.path, 'assets/resources/i18n');
+                    // const dir = join(Editor.Project.path, 'assets/resources/i18n');
+                    const dir = (0, path_1.join)(Editor.Project.path, languageTemplate_1.I18N_DIR);
                     if (!(0, fs_1.existsSync)(dir)) {
                         return;
                     }
-                    vm.current = await Editor.Message.request('scene', 'execute-scene-script', {
-                        name: 'i18n',
-                        method: 'queryCurrentLanguage',
-                        args: [],
-                    }) || '';
+                    vm.current = await Editor.Profile.getProject('i18n', 'lang') || '';
                     const names = (0, fs_1.readdirSync)(dir);
                     vm.$set(vm, 'list', []);
                     names.forEach((name) => {
@@ -149,9 +131,9 @@ module.exports = Editor.Panel.define({
                         console.warn(`语言名称只允许使用 a-z A-Z, ${language} 不合法`);
                         return;
                     }
-                    const languageContent = languageContentTemplate.replace(/{{name}}/g, language);
+                    const languageContent = languageTemplate_1.languageContentTemplate.replace(/{{name}}/g, language);
                     vm.showAddInput = false;
-                    await Editor.Message.request('asset-db', 'create-asset', `db://assets/resources/i18n/${language}.ts`, languageContent);
+                    await Editor.Message.request('asset-db', 'create-asset', `db://i18n/i18n/${language}.ts`, languageContent);
                     vm.refresh();
                 },
             },

@@ -1,7 +1,6 @@
 import { director } from 'cc';
 
 export let _language = 'zh';
-
 export let ready: boolean = false;
 
 /**
@@ -19,13 +18,12 @@ export function init(language: string) {
  */
 export function t(key: string) {
     const win: any = window;
-    
     if (!win.languages) {
         return key;
     }
     const searcher = key.split('.');
-    
     let data = win.languages[_language];
+
     for (let i = 0; i < searcher.length; i++) {
         data = data[searcher[i]];
         if (!data) {
@@ -45,7 +43,7 @@ export function updateSceneRenderers() { // very costly iterations
     }
     for (let i = 0; i < allLocalizedLabels.length; ++i) {
         let label = allLocalizedLabels[i];
-        if(!label.node.active)continue;
+        if (!label.node.active) continue;
         label.updateLabel();
     }
     // walk all nodes with localize sprite and update
@@ -56,7 +54,7 @@ export function updateSceneRenderers() { // very costly iterations
     }
     for (let i = 0; i < allLocalizedSprites.length; ++i) {
         let sprite = allLocalizedSprites[i];
-        if(!sprite.node.active)continue;
+        if (!sprite.node.active) continue;
         sprite.updateSprite();
     }
 }

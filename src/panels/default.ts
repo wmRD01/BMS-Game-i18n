@@ -2,22 +2,9 @@
 
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { I18N_DIR, languageContentTemplate } from '../languageTemplate';
 
 const Vue = require('vue/dist/vue.common.prod');
-
-const languageContentTemplate = `
-const win = window as any;
-
-export const languages = {
-    // Data
-};
-
-if (!win.languages) {
-    win.languages = {};
-}
-
-win.languages.{{name}} = languages;
-`;
 
 // 兼容 3.3.0 之前的版本
 Editor.Panel.define = Editor.Panel.define || function (options) {
@@ -110,7 +97,6 @@ module.exports = Editor.Panel.define({
                     });
                 },
                 async select(language: string) {
-                    // Editor.Dialog.warn(lang);
                     await Editor.Profile.setProject('i18n', 'lang', language);
                     vm.current = language;
                 },
@@ -121,20 +107,18 @@ module.exports = Editor.Panel.define({
                         cancel: 1,
                     });
                     if (result.response === 0) {
-                        await Editor.Message.request('asset-db', 'delete-asset', `db://assets/resources/i18n/${name}.ts`);
+                        await Editor.Message.request('asset-db', 'delete-asset', `db://i18n/i18n/${name}.ts`);
                         vm.refresh();
                     }
                 },
                 async refresh() {
-                    const dir = join(Editor.Project.path, 'assets/resources/i18n');
+                    // const dir = join(Editor.Project.path, 'assets/resources/i18n');
+                    const dir = join(Editor.Project.path, I18N_DIR);
                     if (!existsSync(dir)) {
                         return;
                     }
-                    vm.current = await Editor.Message.request('scene', 'execute-scene-script', {
-                        name: 'i18n',
-                        method: 'queryCurrentLanguage',
-                        args: [],
-                    }) || '';
+                    vm.current = await Editor.Profile.getProject('i18n', 'lang') || '';
+
                     const names = readdirSync(dir);
                     vm.$set(vm, 'list', []);
                     names.forEach((name) => {
@@ -156,7 +140,7 @@ module.exports = Editor.Panel.define({
                     const languageContent = languageContentTemplate.replace(/{{name}}/g, language);
                     vm.showAddInput = false;
 
-                    await Editor.Message.request('asset-db', 'create-asset', `db://assets/resources/i18n/${language}.ts`, languageContent);
+                    await Editor.Message.request('asset-db', 'create-asset', `db://i18n/i18n/${language}.ts`, languageContent);
                     vm.refresh();
                 },
             },

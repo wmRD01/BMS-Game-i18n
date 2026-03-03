@@ -1,8 +1,9 @@
 
-import { I18nKeys } from 'db://assets/resources/i18n/zhTW';
+// import { I18nKeys } from 'db://assets/resources/i18n/zhTW';
 import * as i18n from './LanguageData';
 
 import { _decorator, Component, Enum, Label } from 'cc';
+import { I18nKeyMap, I18nKeys } from './PublicEnum';
 const { ccclass, property, executeInEditMode } = _decorator;
 
 @ccclass('LocalizedLabel')
@@ -26,27 +27,29 @@ export class LocalizedLabel extends Component {
         this.useEnum = v;
         if (v) {
             this.useString = false;
-            this.updateLabelForEnum();
+            this.updateLabel();
         }
     }
     @property({ displayName: '換使用Enum', visible() { return !this.useString; } })
-    private useEnum: boolean = true;
+    private useEnum: boolean = false;
     //#endregion
     //#region i18nKeyEnum
     @property({ visible: false })
     i18nKeyEnum: I18nKeys = I18nKeys.SYS_DEFAULT_LOG;
     @property({
         type: Enum(I18nKeys), displayName: 'i18n', visible() {
-            if (this.useEnum) this.updateLabelForEnum();
+            if (this.useEnum) this.updateLabel();
             return this.useEnum;
         }
     })
+
     private get _i18nKeyEnum() {
         return this.i18nKeyEnum;
     }
-    private set _i18nKeyEnum(str: string) {
-        this.i18nKeyEnum = str as I18nKeys;
-        this.updateLabelForEnum();
+
+    private set _i18nKeyEnum(v: I18nKeys) {
+        this.i18nKeyEnum = v;
+        this.updateLabel();
     }
     //#endregion
     //#region key
@@ -70,8 +73,9 @@ export class LocalizedLabel extends Component {
     label: Label | null = null;
 
     async onLoad() {
+
+        if (!this.getComponent(Label)) this.addComponent(Label)
         if (!i18n.ready) {
-            ''
             const lang = await Editor.Profile.getProject('i18n', 'lang')
             if (!lang) {
                 console.error("找不到對應初始化語系，請新增");
@@ -83,17 +87,24 @@ export class LocalizedLabel extends Component {
     }
 
     fetchRender() {
-        let label = this.getComponent('cc.Label') as Label;
+        const label = this.getComponent(Label);
         if (label) {
             this.label = label;
             this.updateLabel();
-            return;
         }
     }
-    updateLabelForEnum() {
-        this.label && (this.label.string = i18n.t(this.i18nKeyEnum));
-    }
+
     updateLabel() {
-        this.label && (this.label.string = i18n.t(this.key));
+        if (this.label) {
+            if (this.useEnum) {
+                const key = I18nKeyMap[this.i18nKeyEnum];
+                if (key) {
+                    this.label.string = i18n.t(key);
+                }
+            } else {
+                this.label.string = i18n.t(this.key);
+            }
+        }
     }
+
 }

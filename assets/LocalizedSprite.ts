@@ -25,14 +25,14 @@ export class LocalizedSprite extends Component {
     spriteList = [];
 
     async onLoad() {
-        if (!i18n.ready) {
-            const lang = await Editor.Profile.getProject('i18n', 'lang')
-            if (!lang) {
-                console.error("找不到對應初始化語系，請新增");
-                return
-            }
-            i18n.init(lang);
-        }
+        // if (!i18n.ready) {
+        //     const lang = await Editor.Profile.getProject('i18n', 'lang')
+        //     if (!lang) {
+        //         console.error("找不到對應初始化語系，請新增");
+        //         return
+        //     }
+        //     i18n.init(lang);
+        // }
         this.fetchRender();
     }
 

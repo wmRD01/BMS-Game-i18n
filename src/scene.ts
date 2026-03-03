@@ -1,7 +1,7 @@
 'use strict';
 
-export function load() {}
-export function unload() {}
+export function load() { }
+export function unload() { }
 
 export const methods = {
     queryCurrentLanguage() {
@@ -10,7 +10,8 @@ export const methods = {
     },
     changeCurrentLanguage(lang: string) {
         const win = window as any;
-        debugger;
+        console.log("初始化?", lang);
+
         win._languageData.init(lang);
         win._languageData.updateSceneRenderers();
         // @ts-ignore

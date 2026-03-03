@@ -12,7 +12,7 @@ exports.methods = {
     },
     changeCurrentLanguage(lang) {
         const win = window;
-        debugger;
+        console.log("初始化?", lang);
         win._languageData.init(lang);
         win._languageData.updateSceneRenderers();
         // @ts-ignore
